@@ -21,6 +21,7 @@ namespace StudentsApplication
         DataTable d = new DataTable();
         int i;
 
+
         public Form1()
         {
             InitializeComponent();
@@ -239,6 +240,12 @@ namespace StudentsApplication
         private void button8_Click(object sender, EventArgs e)
         {
             
+        }
+
+        private void form2_Click(object sender, EventArgs e)
+        {
+            Form2 form2 = new Form2();
+            form2.Show();
         }
     }
 }

@@ -21,20 +21,70 @@ namespace StudentsApplication
         SqlCommandBuilder cb;
         DataRow r;
         int i;
+        private int currentPosition = 0;
         public Form2()
         {
             InitializeComponent();
+            this.Load += Form2_Load;
+
+            
         }
 
         private void Form2_Load(object sender, EventArgs e)
         {
-            da = new SqlDataAdapter("select * from Students", cn);
-            cb = new SqlCommandBuilder(da);
-            da.Fill(ds, "Students");
-        }
-        
+            try
+            {
+                // Charger les données depuis la base de données dans le DataSet
+                da = new SqlDataAdapter("select * from Students", cn);
+                cb = new SqlCommandBuilder(da);
+                da.Fill(ds, "Students");
 
-        
+                // Remplir le ComboBox avec les IDs des étudiants
+                comboBox1.DataSource = ds.Tables["Students"];
+                comboBox1.DisplayMember = "Id"; 
+                comboBox1.ValueMember = "Id";
+
+                // Charger les données depuis la base de données dans le DataSet pour la table 'option'
+                SqlDataAdapter optionDa = new SqlDataAdapter("select * from [option]", cn);
+
+                DataSet optionDs = new DataSet();
+                optionDa.Fill(optionDs, "Option");
+
+                comboBox2.DataSource = optionDs.Tables["Option"];
+                comboBox2.DisplayMember = "nom";
+                comboBox2.ValueMember = "Id";
+
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erreur lors du chargement des données : " + ex.Message);
+            }
+        }
+
+        private void ShowData(int position)
+        {
+            if (ds.Tables["Students"].Rows.Count > 0)
+            {
+                DataRow row = ds.Tables["Students"].Rows[position];
+                textBox1.Text = row[0].ToString();
+                textBox2.Text = row[1].ToString();
+                textBox3.Text = row[2].ToString();
+                textBox4.Text = row[3].ToString();
+                textBox5.Text = row[4].ToString();
+            }
+            else
+            {
+                // Effacer les champs s'il n'y a pas de données
+                textBox1.Text = "";
+                textBox2.Text = "";
+                textBox3.Text = "";
+                textBox4.Text = "";
+                textBox5.Text = "";
+            }
+        }
+
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -112,6 +162,106 @@ namespace StudentsApplication
             catch (Exception ex)
             {
                 MessageBox.Show("Error: " + ex.Message);
+            }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                double totalNotes = 0;
+                int numberOfStudents = ds.Tables["Students"].Rows.Count;
+
+                // Parcourir chaque ligne et additionner les notes
+                foreach (DataRow row in ds.Tables["Students"].Rows)
+                {
+                    totalNotes += Convert.ToDouble(row["note"]);
+                }
+
+                // Calculer la moyenne
+                double average = totalNotes / numberOfStudents;
+
+                // Afficher la moyenne dans une étiquette (label)
+                label6.Text = "Moyenne des notes : " + average.ToString();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erreur lors du calcul de la moyenne : " + ex.Message);
+            }
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            //next
+            if (currentPosition < ds.Tables["Students"].Rows.Count - 1)
+            {
+                currentPosition++;
+                ShowData(currentPosition);
+            }
+
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            //previous
+            if (currentPosition > 0)
+            {
+                currentPosition--;
+                ShowData(currentPosition);
+            }
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            //first
+            currentPosition = 0;
+            ShowData(currentPosition);
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            //last 
+            currentPosition = ds.Tables["Students"].Rows.Count - 1;
+            ShowData(currentPosition);
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox1.SelectedValue != null)
+            {
+                DataRowView selectedRow = comboBox1.SelectedItem as DataRowView;
+
+                if (selectedRow != null)
+                {
+                    int selectedID = Convert.ToInt32(selectedRow["Id"]); // Remplacez "Id" par le nom de la colonne ID
+                    DataRow[] foundRows = ds.Tables["Students"].Select("Id = " + selectedID); // Remplacez "Id" par le nom de la colonne ID
+
+                    if (foundRows.Length > 0)
+                    {
+                        int index = ds.Tables["Students"].Rows.IndexOf(foundRows[0]);
+                        ShowData(index);
+                    }
+                }
+            }
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox2.SelectedValue != null)
+            {
+                DataRowView selectedOption = comboBox2.SelectedItem as DataRowView;
+
+                if (selectedOption != null)
+                {
+                    int selectedOptionID = Convert.ToInt32(selectedOption["Id"]); 
+                    DataRow[] foundRows = ds.Tables["Students"].Select("option = " + selectedOptionID); 
+
+                    if (foundRows.Length > 0)
+                    {
+                        int index = ds.Tables["Students"].Rows.IndexOf(foundRows[0]);
+                        ShowData(index);
+                    }
+                }
             }
         }
     }

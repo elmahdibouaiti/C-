@@ -233,8 +233,8 @@ namespace StudentsApplication
 
                 if (selectedRow != null)
                 {
-                    int selectedID = Convert.ToInt32(selectedRow["Id"]); // Remplacez "Id" par le nom de la colonne ID
-                    DataRow[] foundRows = ds.Tables["Students"].Select("Id = " + selectedID); // Remplacez "Id" par le nom de la colonne ID
+                    int selectedID = Convert.ToInt32(selectedRow["Id"]); 
+                    DataRow[] foundRows = ds.Tables["Students"].Select("Id = " + selectedID); 
 
                     if (foundRows.Length > 0)
                     {
@@ -262,6 +262,38 @@ namespace StudentsApplication
                         ShowData(index);
                     }
                 }
+            }
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            string searchTerm = textBox6.Text.Trim(); 
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                
+                DataRow[] foundRows = ds.Tables["Students"].Select("nom LIKE '%" + searchTerm + "%'");
+
+                if (foundRows.Length > 0)
+                {
+                    
+                    DataSet searchResultDataSet = new DataSet();
+                    DataTable searchResultTable = foundRows.CopyToDataTable();
+                    searchResultDataSet.Tables.Add(searchResultTable);
+
+                    
+                    dataGridView1.DataSource = searchResultDataSet.Tables[0];
+                }
+                else
+                {
+                    
+                    MessageBox.Show("Aucun étudiant trouvé avec ce nom.");
+                }
+            }
+            else
+            {
+                
+                MessageBox.Show("Veuillez saisir un nom pour effectuer la recherche.");
             }
         }
     }
